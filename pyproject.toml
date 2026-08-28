@@ -1,0 +1,48 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "snl-agent"
+version = "0.1.0"
+description = "Delegate small, well-bounded coding tasks to a local LLM (Qwen via Ollama)."
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "sunwoo", email = "sunwoo604@gmail.com" }]
+keywords = ["llm", "ollama", "qwen", "local-llm", "cli", "agent", "claude-code"]
+# NOTE: no `license` field yet — see the licensing note in README.md.
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Code Generators",
+    "Topic :: Utilities",
+]
+dependencies = [
+    "typer>=0.12",
+    "requests>=2.31",
+    "pyyaml>=6.0",
+    "tomli-w>=1.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+# Replace OWNER with the GitHub account once the repo is published. The same
+# placeholder appears in install.sh (SNL_AGENT_REPO) and README.md.
+[project.urls]
+Homepage = "https://github.com/OWNER/snl-agent"
+Repository = "https://github.com/OWNER/snl-agent"
+Issues = "https://github.com/OWNER/snl-agent/issues"
+
+[project.scripts]
+snl-agent = "snl_agent.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/snl_agent"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
