@@ -12,7 +12,7 @@ loop, so "small local model" doesn't mean "unreliable".
 ## Install
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/OWNER/snl-agent/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/sunwoo604/snl-agent/main/install.sh | sh
 ```
 
 Everything lands in one directory:
@@ -34,8 +34,8 @@ suitable Python itself and tells you what to install if there isn't one.
 Prefer a Python CLI manager? The packaging supports them directly:
 
 ```bash
-uv tool install git+https://github.com/OWNER/snl-agent
-pipx install git+https://github.com/OWNER/snl-agent
+uv tool install git+https://github.com/sunwoo604/snl-agent
+pipx install git+https://github.com/sunwoo604/snl-agent
 ```
 
 ### Uninstall

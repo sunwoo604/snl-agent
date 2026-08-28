@@ -31,12 +31,10 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
 
-# Replace OWNER with the GitHub account once the repo is published. The same
-# placeholder appears in install.sh (SNL_AGENT_REPO) and README.md.
 [project.urls]
-Homepage = "https://github.com/OWNER/snl-agent"
-Repository = "https://github.com/OWNER/snl-agent"
-Issues = "https://github.com/OWNER/snl-agent/issues"
+Homepage = "https://github.com/sunwoo604/snl-agent"
+Repository = "https://github.com/sunwoo604/snl-agent"
+Issues = "https://github.com/sunwoo604/snl-agent/issues"
 
 [project.scripts]
 snl-agent = "snl_agent.cli:main"

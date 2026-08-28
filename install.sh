@@ -1,7 +1,7 @@
 #!/bin/sh
 # Install snl-agent into a self-contained directory under $HOME.
 #
-#   curl -fsSL https://raw.githubusercontent.com/OWNER/snl-agent/main/install.sh | sh
+#   curl -fsSL https://raw.githubusercontent.com/sunwoo604/snl-agent/main/install.sh | sh
 #
 # Layout:
 #   ~/.snl-agent/venv/         the virtualenv, owned by this script
@@ -19,7 +19,9 @@
 set -eu
 
 SNL_AGENT_HOME="${SNL_AGENT_HOME:-$HOME/.snl-agent}"
-SNL_AGENT_REPO="${SNL_AGENT_REPO:-https://github.com/OWNER/snl-agent}"
+# HTTPS, not the git@ SSH form: an installer must work for people who have no
+# SSH key for this repo.
+SNL_AGENT_REPO="${SNL_AGENT_REPO:-https://github.com/sunwoo604/snl-agent}"
 SNL_AGENT_REF="${SNL_AGENT_REF:-main}"
 
 VENV="$SNL_AGENT_HOME/venv"
