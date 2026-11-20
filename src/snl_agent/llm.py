@@ -9,7 +9,7 @@ import re
 
 import requests
 
-from . import config
+from . import config, usage
 
 
 class LLMError(RuntimeError):
@@ -40,6 +40,7 @@ def generate(
     system: str | None = None,
     temperature: float | None = None,
     timeout: float | None = None,
+    task: str | None = None,
 ) -> str:
     """Send one non-streaming completion request to Ollama and return the text.
 
@@ -60,11 +61,20 @@ def generate(
     if system:
         payload["system"] = system
 
-    text = _post(url, payload, timeout)
+    timer = usage.Timer()
+    text, body = _post(url, payload, timeout)
+    usage.record(
+        "call",
+        task=task,
+        model=model,
+        prompt_tokens=body.get("prompt_eval_count") or 0,
+        response_tokens=body.get("eval_count") or 0,
+        seconds=timer.seconds,
+    )
     return strip_thinking(text)
 
 
-def _post(url: str, payload: dict, timeout: float | None) -> str:
+def _post(url: str, payload: dict, timeout: float | None) -> tuple[str, dict]:
     timeout = config.TIMEOUT if timeout is None else timeout
     try:
         resp = requests.post(url, json=payload, timeout=timeout)
@@ -100,4 +110,4 @@ def _post(url: str, payload: dict, timeout: float | None) -> str:
     response = body.get("response")
     if not isinstance(response, str):
         raise LLMError(f"Ollama response had no 'response' field: {body!r}")
-    return response
+    return response, body

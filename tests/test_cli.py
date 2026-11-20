@@ -17,11 +17,11 @@ DIFF = "diff --git a/a.py b/a.py\n@@ -1 +1,2 @@\n+x = 1\n"
 def test_help_lists_every_subcommand():
     result = runner.invoke(app, ["--help"])
     assert result.exit_code == 0
-    for command in ("commit-msg", "convert"):
+    for command in ("commit-msg", "convert", "stats"):
         assert command in result.stdout
 
 
-@pytest.mark.parametrize("command", ["commit-msg", "convert"])
+@pytest.mark.parametrize("command", ["commit-msg", "convert", "stats"])
 def test_each_command_has_its_own_help_saying_when_to_use_it(command):
     result = runner.invoke(app, [command, "--help"])
     assert result.exit_code == 0

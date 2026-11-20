@@ -84,12 +84,7 @@ A fixed four-step ritual:
    `Use this for:` line, so an agent can route to it from `--help` alone.
 4. `tests/test_<task>.py` — mock the LLM; test the validator and the retry.
 
-## Known dead code
-
-`src/snl_agent/usage.py` is not wired to anything and does not currently work:
-it expects token counts that `llm.generate` discards. It is left in place
-pending a refactor of the agent loop, and is deliberately undocumented in the
-README. Don't build on it yet.
+## Not part of the package
 
 `agent_snl.py` at the repo root is a standalone tool-calling prototype, not
 part of the package.

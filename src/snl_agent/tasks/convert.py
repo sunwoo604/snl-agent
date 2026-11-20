@@ -134,6 +134,7 @@ def _convert_with_llm(
             prompt.build(text, source, target, feedback),
             model=model,
             system=prompt.SYSTEM,
+            task="convert",
         )
         return strip_code_fence(raw).strip() + "\n"
 
@@ -149,7 +150,7 @@ def _convert_with_llm(
             )
         return True, ""
 
-    return run_with_retry(attempt, validate, attempts=attempts)
+    return run_with_retry(attempt, validate, attempts=attempts, task="convert")
 
 
 def convert_file(

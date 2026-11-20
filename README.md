@@ -109,6 +109,22 @@ Override with `--engine llm` (always use the model) or `--engine stdlib`
 **Verified:** model output must parse as the target format *and*, when the
 input was parseable, round-trip to exactly the same data.
 
+### `stats`
+
+Shows what the local model has done for you, from a log on your machine.
+
+```bash
+snl-agent stats                 # last 7 days
+snl-agent stats --days 30 --json
+```
+
+Per task: model calls, prompt/response tokens, how often output passed
+verification, average attempts, and seconds per call. A low pass rate or
+high attempt count means the model is struggling; try a bigger one. Only runs
+that actually reached the model are counted (a stdlib-only `convert` is free).
+The log is `~/.snl-agent/data/usage.jsonl`; nothing leaves your machine.
+Set `SNL_AGENT_USAGE=0` to stop recording.
+
 ## Using it with Claude Code
 
 This is what the tool is really for. Drop a routing policy in your project's
@@ -141,6 +157,8 @@ All optional, read from the environment:
 | `SNL_AGENT_ATTEMPTS` | `3` | Verify-and-retry budget |
 | `SNL_AGENT_TEMPERATURE` | `0.2` | Sampling temperature |
 | `SNL_AGENT_MAX_INPUT_CHARS` | `12000` | Input clipped to this, head and tail kept |
+| `SNL_AGENT_USAGE` | `1` | `0` disables the usage log behind `stats` |
+| `SNL_AGENT_DATA` | `~/.snl-agent/data` | Where `usage.jsonl` lives |
 
 The installer also reads `SNL_AGENT_HOME` (default `~/.snl-agent`),
 `SNL_AGENT_REPO` and `SNL_AGENT_REF`.

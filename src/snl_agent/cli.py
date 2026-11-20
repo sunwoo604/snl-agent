@@ -8,6 +8,7 @@ print ``result.value``. Exit codes are uniform:
   2  best-effort output that never passed validation
 """
 
+import json
 import sys
 from contextlib import contextmanager
 from enum import Enum
@@ -16,7 +17,7 @@ from typing import Annotated, Optional
 
 import typer
 
-from . import llm
+from . import llm, usage
 from .tasks import commit_msg as commit_msg_task
 from .tasks import convert as convert_task
 from .verify import RetryResult
@@ -159,6 +160,82 @@ def convert(
         typer.secho(f"wrote {output}", fg=typer.colors.GREEN, err=True)
         _exit_for(result)
     _emit(result)
+
+
+@app.command()
+def stats(
+    days: Annotated[
+        Optional[int],
+        typer.Option("--days", "-d", min=1, help="Window in days. Default: 7."),
+    ] = 7,
+    all_time: Annotated[
+        bool, typer.Option("--all", help="Ignore --days and cover the whole log.")
+    ] = False,
+    as_json: Annotated[
+        bool, typer.Option("--json", help="Machine-readable output.")
+    ] = False,
+) -> None:
+    """Show what the local model has done for you: calls, tokens, pass rate.
+
+    Use this for: checking whether routing work to snl-agent is paying off, or
+    why it feels slow (high attempt counts mean the model keeps failing
+    verification; consider a bigger model). Reads the local usage log only;
+    never calls the model.
+
+        snl-agent stats
+        snl-agent stats --days 30 --json
+
+    Set SNL_AGENT_USAGE=0 to stop recording.
+    """
+    summary = usage.summarize(None if all_time else days)
+    if as_json:
+        typer.echo(json.dumps(_stats_json(summary), indent=2))
+    else:
+        typer.echo(_stats_table(summary))
+
+
+def _stats_json(summary: usage.Summary) -> dict:
+    def row(s: usage.TaskStats) -> dict:
+        return {
+            "calls": s.calls,
+            "prompt_tokens": s.prompt_tokens,
+            "response_tokens": s.response_tokens,
+            "runs": s.runs,
+            "passed": s.passed,
+            "pass_rate": s.pass_rate,
+            "avg_attempts": s.avg_attempts,
+            "avg_seconds_per_call": s.avg_seconds,
+        }
+
+    return {
+        "days": summary.days,
+        "total": row(summary.total),
+        "tasks": {name: row(s) for name, s in sorted(summary.tasks.items())},
+    }
+
+
+def _stats_table(summary: usage.Summary) -> str:
+    window = "all time" if summary.days is None else f"last {summary.days} days"
+    if not summary.tasks:
+        return f"No local-model usage recorded ({window})."
+
+    def fmt(name: str, s: usage.TaskStats) -> str:
+        rate = "-" if s.pass_rate is None else f"{s.pass_rate:.0%}"
+        tries = "-" if s.avg_attempts is None else f"{s.avg_attempts:.1f}"
+        secs = "-" if s.avg_seconds is None else f"{s.avg_seconds:.1f}s"
+        return (
+            f"{name:<12}{s.calls:>6}{s.prompt_tokens:>11,}{s.response_tokens:>10,}"
+            f"{rate:>7}{tries:>10}{secs:>10}"
+        )
+
+    lines = [
+        f"snl-agent usage ({window})",
+        f"{'task':<12}{'calls':>6}{'tok in':>11}{'tok out':>10}{'pass':>7}{'attempts':>10}{'s/call':>10}",
+    ]
+    lines += [fmt(name, s) for name, s in sorted(summary.tasks.items())]
+    if len(summary.tasks) > 1:
+        lines.append(fmt("total", summary.total))
+    return "\n".join(lines)
 
 
 @contextmanager

@@ -91,6 +91,7 @@ def generate_commit_msg(
             prompt.build(diff, feedback),
             model=model,
             system=prompt.SYSTEM,
+            task="commit-msg",
         )
         return clean(raw)
 
@@ -98,4 +99,5 @@ def generate_commit_msg(
         attempt,
         validate_message,
         attempts=config.ATTEMPTS if attempts is None else attempts,
+        task="commit-msg",
     )

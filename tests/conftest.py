@@ -2,7 +2,14 @@
 
 import pytest
 
-from snl_agent import llm
+from snl_agent import config, llm
+
+
+@pytest.fixture(autouse=True)
+def isolated_data_dir(tmp_path, monkeypatch):
+    """Never let a test write to the real ~/.snl-agent/data."""
+    monkeypatch.setattr(config, "DATA_DIR", tmp_path / "data")
+    monkeypatch.setattr(config, "USAGE_ENABLED", True)
 
 
 class FakeLLM:

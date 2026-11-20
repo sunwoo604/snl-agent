@@ -10,6 +10,8 @@ import re
 from dataclasses import dataclass, field
 from typing import Any, Callable
 
+from . import usage
+
 
 class Invalid(Exception):
     """Raise from a validator to reject a candidate with an explanation."""
@@ -34,13 +36,15 @@ def run_with_retry(
     fn: Callable[[str | None], Any],
     validate: Callable[[Any], Any],
     attempts: int = 3,
+    task: str | None = None,
 ) -> RetryResult:
     """Call ``fn`` until ``validate`` accepts its result.
 
     ``fn`` receives the previous failure message (``None`` on the first
     attempt) so it can tighten its prompt. ``validate`` may return ``True`` /
     ``False``, a ``(ok, message)`` pair, ``None`` for success, or raise
-    :class:`Invalid`.
+    :class:`Invalid`. When ``task`` is given the outcome is recorded in the
+    usage log.
     """
     if attempts < 1:
         raise ValueError("attempts must be at least 1")
@@ -53,11 +57,17 @@ def run_with_retry(
         value = fn(feedback)
         ok, message = _normalize(validate, value)
         if ok:
-            return RetryResult(value=value, ok=True, attempts=attempt, errors=errors)
+            return _finished(task, RetryResult(value, True, attempt, errors))
         errors.append(message)
         feedback = message
 
-    return RetryResult(value=value, ok=False, attempts=attempts, errors=errors)
+    return _finished(task, RetryResult(value, False, attempts, errors))
+
+
+def _finished(task: str | None, result: RetryResult) -> RetryResult:
+    if task:
+        usage.record("run", task=task, ok=result.ok, attempts=result.attempts)
+    return result
 
 
 def _normalize(validate: Callable[[Any], Any], value: Any) -> tuple[bool, str]:
